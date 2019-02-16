@@ -2,10 +2,15 @@ package main
 
 import (
 	"bufio"
+	"bytes"
+	"flag"
+	"fmt"
 	"io"
 	"log"
 	"net/http"
 	"os"
+	"sync"
+	"text/template"
 	"time"
 
 	"github.com/joho/godotenv"
@@ -18,6 +23,8 @@ const (
 )
 
 func main() {
+
+	var httpPort = flag.Int("http.port", 1500, "Port to run HTTP server on ?")
 
 	info, err := os.Stdin.Stat()
 	if err != nil {
@@ -55,13 +62,29 @@ func main() {
 		},
 	}
 
+	go func() {
+		var t *template.Template
+		var once sync.Once
+
+		http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+
+			once.Do(func() {
+				tem, err := template.ParseFiles("index.html")
+				if err != nil {
+					log.Fatal(err)
+				}
+
+				t = tem.Lookup("index.html")
+			})
+
+			t.Execute(w, nil)
+		})
+		http.ListenAndServe(fmt.Sprintf(":%d", *httpPort), nil)
+	}()
+
 	reader := bufio.NewReader(os.Stdin)
 
-	// If you happen to be outputting a lot of data in the terminal
-	// and you want to "slow down" a bit
-	// Just remember to call writer.Flush after the for loop
-	// writer := bufio.NewWriter(pusherChannelWriter{client:client})
-	writer := pusherChannelWriter{client: client}
+	writer := bufio.NewWriter(pusherChannelWriter{client: client})
 
 	for {
 		in, _, err := reader.ReadLine()
@@ -69,11 +92,15 @@ func main() {
 			break
 		}
 
+		in = append(in, []byte("\n")...)
 		if _, err := writer.Write(in); err != nil {
 			log.Fatalln(err)
 		}
 	}
 
+	if err := writer.Flush(); err != nil {
+		log.Fatal(err)
+	}
 }
 
 type pusherChannelWriter struct {
@@ -82,6 +109,14 @@ type pusherChannelWriter struct {
 
 func (pusher pusherChannelWriter) Write(p []byte) (int, error) {
 	s := string(p)
+	dd := bytes.Split(p, []byte("\n"))
+
+	var data = make([]string, 0, len(dd))
+
+	for _, v := range dd {
+		data = append(data, string(v))
+	}
+
 	_, err := pusher.client.Trigger(channelName, eventName, s)
 	return len(p), err
 }
