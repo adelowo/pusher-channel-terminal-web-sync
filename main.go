@@ -66,6 +66,8 @@ func main() {
 		var t *template.Template
 		var once sync.Once
 
+		http.Handle("/static/", http.StripPrefix("/static/", http.FileServer(http.Dir("."))))
+
 		http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 
 			once.Do(func() {
@@ -84,7 +86,7 @@ func main() {
 
 	reader := bufio.NewReader(os.Stdin)
 
-	writer := bufio.NewWriter(pusherChannelWriter{client: client})
+	writer := bufio.NewWriterSize(pusherChannelWriter{client: client}, 40)
 
 	for {
 		in, _, err := reader.ReadLine()

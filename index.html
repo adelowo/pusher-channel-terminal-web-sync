@@ -6,20 +6,15 @@
     <title>Pusher realtime feed</title>
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <link rel="icon" type="image/x-icon" href="favicon.ico" />
-    <base href="/" />
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bulma/0.7.2/css/bulma.min.css">
-<style>
-.hidden { display: none }
-</style>
+    <link href="static/app.css" rel="stylesheet">
   <body>
-      <section class="section">
-          <div class="container">
-<div class="columns">
-  <div class="column is-5">
-	  <p> The content of your terminal will be streaming on the right hand side </p>
+  <div id="terminal">
+	  <pre> <output id="logs">
+
+
+	  </output></pre>
   </div>
-  <div class="is-7"></div>
-       </section>
   </body>
-  <script src="app.js"></script>
+  <script src="https://js.pusher.com/4.3/pusher.min.js"></script>
+  <script src="static/app.js"></script>
 </html>
