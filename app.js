@@ -1,5 +1,5 @@
 (function() {
-  const APP_KEY = '3b65aa197f334949f0ef';
+  const APP_KEY = 'PUSHER_APP_KEY';
   const APP_CLUSTER = 'eu';
 
   const logsDiv = document.getElementById('logs');
