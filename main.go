@@ -9,7 +9,9 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"os/signal"
 	"sync"
+	"syscall"
 	"text/template"
 	"time"
 
@@ -23,6 +25,9 @@ const (
 )
 
 func main() {
+
+	shutDownChan := make(chan os.Signal, 1)
+	signal.Notify(shutDownChan, syscall.SIGTERM)
 
 	var httpPort = flag.Int("http.port", 1500, "Port to run HTTP server on ?")
 
@@ -86,7 +91,8 @@ func main() {
 
 	reader := bufio.NewReader(os.Stdin)
 
-	writer := bufio.NewWriterSize(pusherChannelWriter{client: client}, 40)
+	var writer io.Writer
+	writer = pusherChannelWriter{client: client}
 
 	for {
 		in, _, err := reader.ReadLine()
@@ -100,9 +106,7 @@ func main() {
 		}
 	}
 
-	if err := writer.Flush(); err != nil {
-		log.Fatal(err)
-	}
+	<-shutDownChan
 }
 
 type pusherChannelWriter struct {

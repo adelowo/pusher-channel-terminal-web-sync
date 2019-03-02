@@ -12,6 +12,6 @@ func main() {
 	for {
 		fmt.Printf("Generating a new UUID -- %s", uuid.New())
 		fmt.Println()
-		time.Sleep(time.Second)
+		time.Sleep(time.Millisecond * 500)
 	}
 }
