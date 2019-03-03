@@ -9,9 +9,7 @@ import (
 	"log"
 	"net/http"
 	"os"
-	"os/signal"
 	"sync"
-	"syscall"
 	"text/template"
 	"time"
 
@@ -26,17 +24,16 @@ const (
 
 func main() {
 
-	shutDownChan := make(chan os.Signal, 1)
-	signal.Notify(shutDownChan, syscall.SIGTERM)
-
 	var httpPort = flag.Int("http.port", 1500, "Port to run HTTP server on ?")
+
+	flag.Parse()
 
 	info, err := os.Stdin.Stat()
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	if info.Mode()&os.ModeCharDevice != 0 || info.Size() <= 0 {
+	if info.Mode()&os.ModeCharDevice != 0 {
 		log.Println("This command is intended to be used as a pipe such as yourprogram | thisprogram")
 		os.Exit(0)
 	}
@@ -86,7 +83,7 @@ func main() {
 
 			t.Execute(w, nil)
 		})
-		http.ListenAndServe(fmt.Sprintf(":%d", *httpPort), nil)
+		log.Fatal(http.ListenAndServe(fmt.Sprintf(":%d", *httpPort), nil))
 	}()
 
 	reader := bufio.NewReader(os.Stdin)
@@ -105,8 +102,6 @@ func main() {
 			log.Fatalln(err)
 		}
 	}
-
-	<-shutDownChan
 }
 
 type pusherChannelWriter struct {
