@@ -1,7 +1,7 @@
 # pusher-channel-terminal-web-sync
 
 How to make use of Pusher Channels to show the output of your terminal in realtime.
-Think of something similar to how your CI server would display the progress of a build in realtime.
+Think of something similar to how your CI server would display the progress of a build in realtime. https://pusher.com/tutorials/terminal-web-go
 
 #### Getting started
 
